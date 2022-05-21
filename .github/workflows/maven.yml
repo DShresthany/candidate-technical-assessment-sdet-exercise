@@ -22,8 +22,8 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
-    - name: Build Maven and run unit tests
-      run: mvn clean test
+    - name: Build project and run unit tests
+      run: mvn clean verify
     - name: Build and run spring docker container
       run: docker-compose up -d
     - name: Run Integration tests # Skips unit tests
