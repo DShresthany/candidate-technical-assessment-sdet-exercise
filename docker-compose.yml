@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  test-container:
+    build: .
+    environment:
+      ARTIFACT_NAME: "sdet-assessment"
+    #local setup
+    #container runs on port 8080
+    ports:
+      - "8080:8080"
