@@ -22,12 +22,12 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
-    - name: Build Maven
-      run: mvn -B package --file pom.xml
+    - name: Build Maven and run unit tests
+      run: mvn clean test
     - name: Start Spring boot application
       run: mvn spring-boot:run
-    - name: Run tests
-      run: mvn clean verify
+    - name: Run Integration tests # Skips unit tests
+      run: mvn clean test-compile failsafe:integration-test
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()

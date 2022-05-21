@@ -1,5 +1,8 @@
 package com.gaggle.sdetassessment;
 
+import com.gaggle.sdetassessment.NotFoundException;
+import com.gaggle.sdetassessment.School;
+import com.gaggle.sdetassessment.SchoolController;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
