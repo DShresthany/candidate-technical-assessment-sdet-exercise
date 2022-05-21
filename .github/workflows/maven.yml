@@ -27,9 +27,15 @@ jobs:
     - name: Build and run spring docker container
       run: docker-compose up -d
     - name: Run Integration tests # Skips unit tests
-      run: mvn clean test-compile failsafe:integration-test
+      run: mvn test-compile failsafe:integration-test
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
       with:
         files: "target/surefire-reports/**/*.xml"
+    - name: Publish Integration Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      if: always()
+      with:
+        check_name: "Integration Test Results"
+        files: "target/failsafe-reports/**/*.xml"
