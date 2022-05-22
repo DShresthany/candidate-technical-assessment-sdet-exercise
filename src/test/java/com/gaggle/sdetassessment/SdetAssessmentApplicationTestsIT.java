@@ -1,18 +1,11 @@
 package com.gaggle.sdetassessment;
 
 import com.gaggle.sdetassessment.sdk.SchoolSdk;
-import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import org.assertj.core.api.SoftAssertions;
-import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.event.annotation.BeforeTestClass;
-
 import java.util.List;
-
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -30,14 +23,21 @@ class SdetAssessmentApplicationTestsIT {
     }
 
     private void schoolValidation(School actualSchool, School expectedSchool) {
+        /**
+         * for validating the expected school object versus actual school object created
+         * */
+
         assertThat(actualSchool).isNotNull();
         Integer schoolId = actualSchool.getSchoolId();
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(schoolId).isInstanceOf(Integer.class);
-        softly.assertThat(actualSchool.getEmailAddress()).isEqualTo(expectedSchool.getEmailAddress());
-        softly.assertThat(actualSchool.getStudentCount()).isEqualTo(expectedSchool.getStudentCount());
-        softly.assertThat(actualSchool.getSchoolName()).isEqualTo(expectedSchool.getSchoolName());
+        softly.assertThat(actualSchool.getEmailAddress()).as("EmailAddress").isEqualTo(expectedSchool.getEmailAddress());
+        softly.assertThat(actualSchool.getStudentCount()).as("StudentCount").isEqualTo(expectedSchool.getStudentCount());
+        softly.assertThat(actualSchool.getSchoolName()).as("SchoolName").isEqualTo(expectedSchool.getSchoolName());
         softly.assertAll();
+    }
+    @Test
+    void contextLoads() {
     }
 
     @Test
@@ -48,16 +48,6 @@ class SdetAssessmentApplicationTestsIT {
         //Retrieve the created data. Do not just rely on the response returned by the create call.
         School retrievedSchool = schoolSdk.getSchool(schoolId);
         schoolValidation(retrievedSchool, payload);
-    }
-
-    @Test
-    void createSchoolTestNegetive() {
-        int schoolId = 16;
-        School school = new School(schoolId, "", 1100, "principal@york.com");
-
-        //if schoolName field is left empty, NotFound Exception should be shown
-        Response createdSchool = schoolSdk.createSchool(school, 404);
-        assertThat(createdSchool.body().asString()).contains("NotFoundException");
     }
 
     @Test
@@ -88,6 +78,7 @@ class SdetAssessmentApplicationTestsIT {
 
         // Also, there is another bug in this response where the stacktrace of the code is returned in the response body.
         // Internal stack traces should not be exposed in public APIs. It's a security as well as usability issue.
+        System.out.println("getSchoolResponse.asPrettyString() = " + getSchoolResponse.asPrettyString());
         assertThat(getSchoolResponse.body().asString()).contains("NotFoundException");
     }
 
@@ -106,9 +97,9 @@ class SdetAssessmentApplicationTestsIT {
 
     @Test
     void updateSchoolNegative() {
-        int schoolId = 999;
-        School updatePayload = new School(schoolId, "Devry", 400, "principal@Devry.com");
-        Response updatedSchool = schoolSdk.updateSchool(updatePayload, schoolId, 500);
+        int invalidSchoolId = 999;
+        School updatePayload = new School(invalidSchoolId, "Devry", 400, "principal@Devry.com");
+        Response updatedSchool = schoolSdk.updateSchool(updatePayload, invalidSchoolId, 500);
         // Status code should ideally not be 500.
         // 500 -> is for server side errors.
         // In this case, user is clearly passing an invalid school ID. So it's not a server error.
@@ -118,5 +109,4 @@ class SdetAssessmentApplicationTestsIT {
         // Internal stack traces should not be exposed in public APIs. It's a security as well as usability issue.
         assertThat(updatedSchool.body().asString()).contains("NotFoundException");
     }
-
 }
