@@ -23,10 +23,20 @@ public class SchoolSdk {
                 .body().as(School.class, ObjectMapperType.GSON);
     }
 
-    public School updateSchool(School payload, String schoolId) {
+    public Response createSchool(School payload, Integer expectedStatusCode) {
+        return RestClient
+                .put("/schools/", SerializationHelper.toJsonString(payload), expectedStatusCode);
+    }
+
+    public School updateSchool(School payload, Integer schoolId) {
         return RestClient
                 .post("/schools/" + schoolId, SerializationHelper.toJsonString(payload), HttpStatus.SC_OK)
                 .body().as(School.class, ObjectMapperType.GSON);
+    }
+
+    public Response updateSchool(School payload, Integer schoolId, Integer expectedStatusCode) {
+        return RestClient
+                .post("/schools/" + schoolId, SerializationHelper.toJsonString(payload), expectedStatusCode);
     }
 
     public School getSchool(Integer schoolId) {
