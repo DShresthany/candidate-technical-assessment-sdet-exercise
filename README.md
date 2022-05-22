@@ -46,7 +46,8 @@ There are four endpoints to test in School Controller
 | URL                             | HTTP Method | Description                                                                                                                                                                                                 |
 |---------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | http://localhost:8080/schools   | GET         | Get all the schools in memory. This will return an array of schools objects.                                                                                                                                |
-| http://localhost:8080/schools/4 | GET         | Get as specific school from memory (using the id). The schools in memory have ids 0 through 10. You may use any integer you wish. If the id is not found, the application will throw a NotFoundException.   |
+| 
+| GET         | Get as specific school from memory (using the id). The schools in memory have ids 0 through 10. You may use any integer you wish. If the id is not found, the application will throw a NotFoundException.   |
 | http://localhost:8080/schools/  | PUT         | Add a school to memory. It will add the new school with the id you give in the object. Submit the school object in the body of the PUT.                                                                     |
 | http://localhost:8080/schools/4 | POST        | Update a specific school in memory. The schools in memory have ids 0 through 10. Submit the school object in the body of the POST.  If the id is not found, the application will throw a NotFoundException. |
 

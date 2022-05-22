@@ -4,7 +4,6 @@ import com.gaggle.sdetassessment.sdk.SchoolSdk;
 import io.restassured.http.ContentType;
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
-import org.assertj.core.api.SoftAssertions;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,12 +35,10 @@ class SdetAssessmentApplicationTests {
     private void schoolValidation(School actualSchool, School expectedSchool) {
         assertThat(actualSchool).isNotNull();
         Integer schoolId = actualSchool.getSchoolId();
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(schoolId).isInstanceOf(Integer.class);
-        softly.assertThat(actualSchool.getEmailAddress()).isEqualTo(expectedSchool.getEmailAddress());
-        softly.assertThat(actualSchool.getStudentCount()).isEqualTo(expectedSchool.getStudentCount());
-        softly.assertThat(actualSchool.getSchoolName()).isEqualTo(expectedSchool.getSchoolName());
-        softly.assertAll();
+        assertThat(schoolId).isInstanceOf(Integer.class);
+        assertThat(expectedSchool.getEmailAddress()).isEqualTo(actualSchool.getEmailAddress());
+        assertThat(expectedSchool.getStudentCount()).isEqualTo(actualSchool.getStudentCount());
+        assertThat(expectedSchool.getSchoolName()).isEqualTo(actualSchool.getSchoolName());
     }
 
     @Test
@@ -52,16 +49,6 @@ class SdetAssessmentApplicationTests {
         //Retrieve the created data. Do not just rely on the response returned by the create call.
         School retrievedSchool = schoolSdk.getSchool(schoolId);
         schoolValidation(retrievedSchool, payload);
-    }
-
-    @Test
-    void createSchoolTestNegetive() {
-        int schoolId = 16;
-        School school = new School(schoolId, "", 1100, "principal@york.com");
-
-        //if schoolName field is left empty, NotFound Exception should be shown
-        Response createdSchool = schoolSdk.createSchool(school, 404);
-        assertThat(createdSchool.body().asString()).contains("NotFoundException");
     }
 
     @Test
@@ -84,7 +71,7 @@ class SdetAssessmentApplicationTests {
 
     @Test
     void getInvalidSchool() {
-        Response getSchoolResponse = schoolSdk.getSchool(999, 500);
+        Response getSchoolResponse = schoolSdk.getSchool(50, 500);
         // Status code should ideally not be 500.
         // 500 -> is for server side errors.
         // In this case, user is clearly passing an invalid school ID. So it's not a server error.
@@ -92,40 +79,44 @@ class SdetAssessmentApplicationTests {
 
         // Also, there is another bug in this response where the stacktrace of the code is returned in the response body.
         // Internal stack traces should not be exposed in public APIs. It's a security as well as usability issue.
-        assertThat(getSchoolResponse.body().asString()).contains("NotFoundException");
+    }
+
+    @Disabled
+    @Test
+    void retrieveIndividualDataNegative() {
+        Response response = given().contentType(ContentType.JSON)
+                .pathParam("schoolId", 50)
+                .when()
+                .get("/schools/{schoolId}").then()
+                .assertThat().statusCode(500).log().all().extract().response();
     }
 
     @Test
-    void updateSchool(){
-        School updatePayload = new School(schoolId, "Devry", 400, "principal@Devry.com");
-        School updatedSchool = schoolSdk.updateSchool(updatePayload, schoolId);
+    void updateData() throws JSONException {
 
-        assertThat(updatedSchool).isNotNull();
+        School payload = new School(schoolId, "Devry", 500, "principal@devry.com");
 
-        schoolValidation(updatedSchool, updatePayload);
-        //Retrieve the created data. Do not just rely on the response returned by the create call.
-        School retrievedSchool = schoolSdk.getSchool(schoolId);
-        schoolValidation(retrievedSchool, updatedSchool);
+        Response response = given().contentType(ContentType.JSON)
+                .pathParam("schoolId", schoolId)
+                .body(payload, ObjectMapperType.GSON)
+                .when().post("/schools/{schoolId}")
+                .then().statusCode(200).log().all().extract().response();
+
+        School responseBody = response.body().as(School.class, ObjectMapperType.GSON);
+        Assertions.assertEquals(responseBody, payload);
     }
 
+    @Disabled
     @Test
-    void updateSchoolNegative() {
-        int schoolId = 999;
-        School updatePayload = new School(schoolId, "Devry", 400, "principal@Devry.com");
-        Response updatedSchool = schoolSdk.updateSchool(updatePayload, schoolId, 500);
-        // Status code should ideally not be 500.
-        // 500 -> is for server side errors.
-        // In this case, user is clearly passing an invalid school ID. So it's not a server error.
-        // Status code should be in 4XX series. For e.g 400: Bad Request or 404: Requested resource not found.
+    void updateDataNegative() throws JSONException {
 
-        // Also, there is another bug in this response where the stacktrace of the code is returned in the response body.
-        // Internal stack traces should not be exposed in public APIs. It's a security as well as usability issue.
-        assertThat(updatedSchool.body().asString()).contains("NotFoundException");
-    }
+        School payload = new School(schoolId, "Devry", 500, "principal@devry.com");
 
-    @Test
-    void invalidCharTest(){
-
+        Response response = given().contentType(ContentType.JSON)
+                .pathParam("schoolId", schoolId)
+                .body(payload, ObjectMapperType.GSON)
+                .when().post("/schools/{schoolId}")
+                .then().statusCode(500).log().all().extract().response();
     }
 }
 
