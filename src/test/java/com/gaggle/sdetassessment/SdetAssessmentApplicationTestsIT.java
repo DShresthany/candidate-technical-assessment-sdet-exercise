@@ -22,11 +22,15 @@ class SdetAssessmentApplicationTestsIT {
         payload = new School(schoolId, "York", 1100, "principal@york.com");
     }
 
+    // test passed when passing api with a missing school name field
+    // load and stress testing is very important for loads of data
+    // api pagination:
+    // multi thread test to test performance.
+
     private void schoolValidation(School actualSchool, School expectedSchool) {
         /**
          * for validating the expected school object versus actual school object created
          * */
-
         assertThat(actualSchool).isNotNull();
         Integer schoolId = actualSchool.getSchoolId();
         SoftAssertions softly = new SoftAssertions();
@@ -36,8 +40,10 @@ class SdetAssessmentApplicationTestsIT {
         softly.assertThat(actualSchool.getSchoolName()).as("SchoolName").isEqualTo(expectedSchool.getSchoolName());
         softly.assertAll();
     }
+
     @Test
     void contextLoads() {
+
     }
 
     @Test
@@ -45,7 +51,7 @@ class SdetAssessmentApplicationTestsIT {
         School createdSchool = schoolSdk.createSchool(payload);
         assertThat(createdSchool).isNotNull();
         schoolValidation(createdSchool, payload);
-        //Retrieve the created data. Do not just rely on the response returned by the create call.
+        // Retrieve the created data. Do not just rely on the response returned by the create call.
         School retrievedSchool = schoolSdk.getSchool(schoolId);
         schoolValidation(retrievedSchool, payload);
     }
@@ -110,3 +116,4 @@ class SdetAssessmentApplicationTestsIT {
         assertThat(updatedSchool.body().asString()).contains("NotFoundException");
     }
 }
+
